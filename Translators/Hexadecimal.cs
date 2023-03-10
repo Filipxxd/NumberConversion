@@ -35,6 +35,12 @@ namespace NumberConversion.Translators
         /// <exception cref="ArgumentException">Thrown if the input string is not a valid hexadecimal string.</exception>
         public static int TranslateFrom(string hexadecimalNum)
         {
+            hexadecimalNum = hexadecimalNum.ToUpper();
+            if (!IsValid(hexadecimalNum))
+            {
+                throw new ArgumentException($"Number {hexadecimalNum} is not valid hexadecimal number!");
+            }
+
             int decimalOutput = 0;
             int hexLength = hexadecimalNum.Length;
 
@@ -94,7 +100,7 @@ namespace NumberConversion.Translators
         /// </summary>
         /// <param name="hexNumber">A string representing a hexadecimal number</param>
         /// <returns>True if the hexadecimal number is a valid hexadecimal number, false otherwise</returns>
-        public static bool IsValid(string hexNumber)
+        private static bool IsValid(string hexNumber)
         {
             foreach (char item in hexNumber)
             {
