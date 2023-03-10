@@ -7,7 +7,7 @@ namespace NumberConversion.Translators
     /// </summary>
     public static class Roman
     {
-        public static readonly Dictionary<char, int> RomanToDecimalDictionary = new()
+        private static readonly Dictionary<char, int> RomanToDecimalDictionary = new()
         {
             { 'I', 1 },
             { 'V', 5 },
@@ -18,7 +18,7 @@ namespace NumberConversion.Translators
             { 'M', 1000 },
         };
 
-        public static readonly Dictionary<int, string> DecimalToRomanDictionary = new()
+        private static readonly Dictionary<int, string> DecimalToRomanDictionary = new()
         {
             { 1000, "M" },
             { 900, "CM" },
