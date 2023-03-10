@@ -4,6 +4,7 @@ namespace NumberConversion
 {
     static class TranslationManager
     {
+        private readonly static int MaxValueForConversion = 10000;
 
         public static List<string> NumericalSystems = new() { "Binary", "Roman", "Decimal", "Hexadecimal", "Octal" };
 
@@ -13,16 +14,16 @@ namespace NumberConversion
         /// <param name="value">The decimal value to convert.</param>
         /// <param name="systems">The list of number systems to convert the value to.</param>
         /// <returns>A dictionary that maps each number system to its corresponding converted value.</returns>
-        private static string GetFromDecimal(int value, string system)
+        private static string GetFromDecimal(int decimalValue, string system)
         {
             string result = system switch
             {
-                "Binary" => Binary.TranslateTo(value),
-                "Hexadecimal" => Hexadecimal.TranslateTo(value),
-                "Octal" => Octal.TranslateTo(value),
-                "Roman" => Roman.TranslateTo(value),
-                "Decimal" => value.ToString(),
-                _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported.", nameof(system)),
+                "Binary" => Binary.TranslateTo(decimalValue),
+                "Hexadecimal" => Hexadecimal.TranslateTo(decimalValue),
+                "Octal" => Octal.TranslateTo(decimalValue),
+                "Roman" => Roman.TranslateTo(decimalValue),
+                "Decimal" => decimalValue.ToString(),
+                _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
             };
             return result;
         }
@@ -42,7 +43,7 @@ namespace NumberConversion
                 "Octal" => Octal.TranslateFrom(Convert.ToInt32(num)),
                 "Roman" => Roman.TranslateFrom(num),
                 "Decimal" => Convert.ToInt32(num),
-                _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported.", nameof(system)),
+                _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
             };
             return decimalValue;
         }
@@ -56,6 +57,22 @@ namespace NumberConversion
         /// <returns>A dictionary containing the translated number for each output numerical system.</returns>
         public static Dictionary<string, string> Translate(string numSystem, string number, List<string> outputSystems)
         {
+            // If the input number is digit only (e.g. is not from hexadecimal or roman numerical system) and greater than 10000
+            if (numSystem != "Hexadecimal" && numSystem != "Roman")
+            {
+                if (Convert.ToInt32(number) > MaxValueForConversion)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        $"The input number '{number}' is too large. " +
+                        $"Please enter a number less than or equal to {MaxValueForConversion}.");
+                }
+
+                if (Convert.ToDouble(number) % 1 != 0)
+                {
+                    throw new ArgumentException($"The input number '{number}' cannot be of type double! ");
+                }
+            }
+
             // If the input system of number from user is not decimal, translate the number to decimal first.
             if (numSystem != "Decimal")
             {
@@ -66,7 +83,7 @@ namespace NumberConversion
             Dictionary<string, string> translations = new();
             foreach (var outputSystem in outputSystems)
             {
-                translations.Add(outputSystem, GetFromDecimal(int.Parse(number), outputSystem));
+                translations.Add(value: GetFromDecimal(int.Parse(number), outputSystem), key: outputSystem);
             }
 
             return translations;
