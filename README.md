@@ -11,6 +11,5 @@ A console app project for converting numbers from one numerical system to other.
 
 ## Aditional Information
 
-* For any conversion float numbers not accepted!
-* For Roman and Binary conversion, negative not accepted!
+* Currently the converter accepts only positive whole number & zero!
 * This project uses Spectre.Console framework, which helps with UI design of the application.
