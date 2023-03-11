@@ -7,6 +7,8 @@ namespace NumberConversion.Translators
     /// </summary>
     public static class Roman
     {
+        private static readonly int MaxInputValue = 20000; // In decimal
+
         private static readonly Dictionary<char, int> RomanToDecimalDictionary = new()
         {
             { 'I', 1 },
@@ -38,14 +40,24 @@ namespace NumberConversion.Translators
         /// <summary>
         /// Converts a Roman numeral to its decimal representation.
         /// </summary>
-        /// <param name="roman">The Roman numeral to convert.</param>
+        /// <param name="romanNum">The Roman numeral to convert.</param>
         /// <returns>The decimal representation of the input Roman numeral.</returns>
-        public static int TranslateFrom(string roman)
+        public static int TranslateFrom(string romanNum)
         {
+            if (romanNum == "0")
+            {
+                throw new InvalidOperationException($"Zero is not defined in Roman Numerical System!");
+            }
+
+            if (!IsValid(romanNum))
+            {
+                throw new ArgumentException($"Number {romanNum} is not valid roman number!");
+            }
+
             int decimalOutput = 0;
 
             int previous = 0;
-            foreach (char currentRoman in roman)
+            foreach (char currentRoman in romanNum)
             {
                 int current = RomanToDecimalDictionary[currentRoman];
                 if (previous != 0 && current > previous)
@@ -66,26 +78,40 @@ namespace NumberConversion.Translators
         /// <summary>
         /// Converts a decimal number to its Roman numeral representation.
         /// </summary>
-        /// <param name="number">The decimal number to convert.</param>
+        /// <param name="decimalNum">The decimal number to convert.</param>
         /// <returns>The Roman numeral representation of the input decimal number.</returns>
-        public static string TranslateTo(int number)
+        public static string TranslateTo(int decimalNum)
         {
-            if (number == 0)
+            if (decimalNum > MaxInputValue)
             {
-                return "nulla";
+                throw new ArgumentOutOfRangeException($"Limit for converting to Roman is {MaxInputValue}!");
             }
 
             StringBuilder romanOutput = new();
             foreach (var row in DecimalToRomanDictionary)
             {
-                while (number >= row.Key)
+                while (decimalNum >= row.Key)
                 {
                     romanOutput.Append(row.Value);
-                    number -= row.Key;
+                    decimalNum -= row.Key;
                 }
             }
 
             return romanOutput.ToString();
+        }
+
+        public static bool IsValid(string romanNumber)
+        {
+
+            foreach (char item in romanNumber)
+            {
+                if (!RomanToDecimalDictionary.ContainsKey(item))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

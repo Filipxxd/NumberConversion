@@ -4,27 +4,87 @@ namespace NumberConversion
 {
     static class TranslationManager
     {
-        private readonly static int MaxValueForConversion = 10000;
-
         public static List<string> NumericalSystems = new() { "Binary", "Roman", "Decimal", "Hexadecimal", "Octal" };
+
+        /// <summary>
+        /// Translates a number from one numerical system to one or more output numerical systems.
+        /// </summary>
+        /// <param name="fromSystem">The input numerical system of the number.</param>
+        /// <param name="number">The number to translate.</param>
+        /// <param name="outputSystems">A list of output numerical systems to translate the number to.</param>
+        /// <returns>A dictionary containing the translated number for each output numerical system.</returns>
+        public static Dictionary<string, string> Translate(string number, string numSystem, List<string> outputSystems)
+        {
+            int num = 0;
+            if (IsValid(number))
+            {
+                if (numSystem != "Decimal")
+                {
+                    num = GetToDecimal(number, numSystem);
+                }
+                else
+                {
+                    num = (int)Math.Floor(double.Parse(number));
+                }
+            }
+
+            Dictionary<string, string> translations = new();
+            foreach (var outputSystem in outputSystems)
+            {
+                translations.Add(outputSystem, GetFromDecimal(num, outputSystem));
+            }
+
+            return translations;
+        }
+
+        /// <summary>
+        /// Validates whether a given string is a valid number in any numerical system via custom ruleset.
+        /// </summary>
+        /// <param name="value">The string to validate.</param>
+        /// <returns>True if the string is a valid number, otherwise false.</returns>
+        private static bool IsValid(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return false;
+            }
+
+            int commaIndex = value.IndexOf('.');
+            if (commaIndex != -1)
+            {
+                value = value.Remove(commaIndex, 1).Insert(commaIndex, ",");
+            }
+
+            if (!double.TryParse(value, out double _))
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Converts a decimal value to a list of pairs: number system and value.
         /// </summary>
-        /// <param name="value">The decimal value to convert.</param>
-        /// <param name="systems">The list of number systems to convert the value to.</param>
+        /// <param name="decimalValue">The decimal value to convert.</param>
+        /// <param name="system">The list of number systems to convert the value to.</param>
         /// <returns>A dictionary that maps each number system to its corresponding converted value.</returns>
         private static string GetFromDecimal(int decimalValue, string system)
         {
+            if (system == "Decimal")
+            {
+                return decimalValue.ToString();
+            }
+
             string result = system switch
             {
                 "Binary" => Binary.TranslateTo(decimalValue),
                 "Hexadecimal" => Hexadecimal.TranslateTo(decimalValue),
                 "Octal" => Octal.TranslateTo(decimalValue),
                 "Roman" => Roman.TranslateTo(decimalValue),
-                "Decimal" => decimalValue.ToString(),
                 _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
             };
+
             return result;
         }
 
@@ -38,55 +98,13 @@ namespace NumberConversion
         {
             int decimalValue = system switch
             {
-                "Binary" => Binary.TranslateFrom(Convert.ToInt32(num)),
+                "Binary" => Binary.TranslateFrom(num),
                 "Hexadecimal" => Hexadecimal.TranslateFrom(num),
-                "Octal" => Octal.TranslateFrom(Convert.ToInt32(num)),
+                "Octal" => Octal.TranslateFrom(num),
                 "Roman" => Roman.TranslateFrom(num),
-                "Decimal" => Convert.ToInt32(num),
                 _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
             };
             return decimalValue;
-        }
-
-        /// <summary>
-        /// Translates a number from one numerical system to one or more output numerical systems.
-        /// </summary>
-        /// <param name="fromSystem">The input numerical system of the number.</param>
-        /// <param name="number">The number to translate.</param>
-        /// <param name="outputSystems">A list of output numerical systems to translate the number to.</param>
-        /// <returns>A dictionary containing the translated number for each output numerical system.</returns>
-        public static Dictionary<string, string> Translate(string numSystem, string number, List<string> outputSystems)
-        {
-            // If the input number is digit only (e.g. is not from hexadecimal or roman numerical system) and greater than 10000
-            if (numSystem != "Hexadecimal" && numSystem != "Roman")
-            {
-                if (Convert.ToInt32(number) > MaxValueForConversion)
-                {
-                    throw new ArgumentOutOfRangeException(
-                        $"The input number '{number}' is too large. " +
-                        $"Please enter a number less than or equal to {MaxValueForConversion}.");
-                }
-
-                if (Convert.ToDouble(number) % 1 != 0)
-                {
-                    throw new ArgumentException($"The input number '{number}' cannot be of type double! ");
-                }
-            }
-
-            // If the input system of number from user is not decimal, translate the number to decimal first.
-            if (numSystem != "Decimal")
-            {
-                number = GetToDecimal(number, numSystem).ToString();
-            }
-
-            // Translate the number to each selected output system.
-            Dictionary<string, string> translations = new();
-            foreach (var outputSystem in outputSystems)
-            {
-                translations.Add(value: GetFromDecimal(int.Parse(number), outputSystem), key: outputSystem);
-            }
-
-            return translations;
         }
     }
 }

@@ -2,7 +2,7 @@
 
 A console app project for converting numbers from one numerical system to other. 
 
-## Availible Numerical Systems
+## Available Numerical Systems
 
 * Binary
 * Hexadecimal

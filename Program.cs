@@ -6,47 +6,45 @@ namespace NumberConversion
     {
         public static void Main(string[] args)
         {
-            // Check if the console supports interactive features.
             if (!AnsiConsole.Profile.Capabilities.Interactive)
             {
                 AnsiConsole.MarkupLine("[red]Environment does not support interaction.[/]");
                 return;
             }
 
-            // Displays header
             AnsiConsole.Write(
                 new FigletText("Number Conversion")
                     .Centered()
                     .Color(Color.Red));
 
-            // Ask the user for the number to translate.
             WriteDivider("Number");
             string number = AskInputNumber();
 
-            // Ask the user for the input numerical system.
             WriteDivider("Input Numerical System");
             string inputSystem = AskInputSystem();
 
-            // Ask the user for the output numerical systems.
             WriteDivider("Output Numerical System(s)");
             List<string> outputSystems = AskOutputSystems();
 
-            // Display the results in a table.
-            WriteDivider("Answer");
+            WriteDivider("Result");
             try
             {
-                DisplayTranslationsToConsole(TranslationManager.Translate(inputSystem, number, outputSystems));
+                DisplayTranslationsToConsole(TranslationManager.Translate(number, inputSystem, outputSystems));
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine(ex.Message);
             }
             catch (FormatException ex)
             {
-                AnsiConsole.Write($"{ex.GetType().Name}: {number} is not valid number in {inputSystem} system!");
+                Console.WriteLine(ex.Message);
             }
             catch (Exception ex)
             {
-                AnsiConsole.Write($"{ex.GetType().Name}: {ex.Message}");
+                AnsiConsole.Write(ex.Message);
             }
 
-            // Confirm closing the app.
+
             WriteDivider("Press Any To Close");
             Console.ReadLine();
 

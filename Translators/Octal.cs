@@ -2,13 +2,14 @@
 {
     static class Octal
     {
-        public static int TranslateFrom(int octalNum)
+        public static int TranslateFrom(string octalNumRaw)
         {
-            if (!IsValid(octalNum))
+            if (!IsValid(octalNumRaw))
             {
-                throw new ArgumentException($"Number {octalNum} is not valid octal number!");
+                throw new ArgumentException($"Number {octalNumRaw} is not valid octal number!");
             }
 
+            int octalNum = Convert.ToInt32(octalNumRaw);
             int decimalOutput = 0;
             int exponent = 1;
             while (octalNum > 0)
@@ -23,11 +24,6 @@
 
         public static string TranslateTo(int decimalNum)
         {
-            if (decimalNum == 0)
-            {
-                return "0";
-            }
-
             string octalOutput = string.Empty;
             int i = 0;
             while (decimalNum != 0)
@@ -39,14 +35,14 @@
             return octalOutput;
         }
 
-        public static bool IsValid(int input)
+        public static bool IsValid(string octalNumber)
         {
-            if (string.IsNullOrEmpty(input.ToString()) && input != 0)
+            if (!int.TryParse(octalNumber, out int _))
             {
                 return false;
             }
 
-            foreach (char c in input.ToString())
+            foreach (char c in octalNumber)
             {
                 if (c == '9')
                 {

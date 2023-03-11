@@ -2,13 +2,14 @@
 {
     static class Binary
     {
-        public static int TranslateFrom(int binaryNum)
+        public static int TranslateFrom(string binaryNumRaw)
         {
-            if (!IsValid(binaryNum.ToString()))
+            if (!IsValid(binaryNumRaw))
             {
-                throw new ArgumentException($"Number {binaryNum} is not valid binary number!");
+                throw new ArgumentException($"Number {binaryNumRaw} is not valid binary number!");
             }
 
+            int binaryNum = Convert.ToInt32(binaryNumRaw);
             int decimalOutput = 0;
             int base_ = 1;
             while (binaryNum > 0)
@@ -43,16 +44,16 @@
         /// <summary>
         /// Checks whether a given string input is a valid binary number.
         /// </summary>
-        /// <param name="input">The string to check.</param>
+        /// <param name="binaryNumber">The string to check.</param>
         /// <returns>True if the input is a valid binary number, false otherwise.</returns>
-        public static bool IsValid(string input)
+        private static bool IsValid(string binaryNumber)
         {
-            if (string.IsNullOrEmpty(input))
+            if (!int.TryParse(binaryNumber, out int _))
             {
                 return false;
             }
 
-            foreach (char c in input)
+            foreach (char c in binaryNumber)
             {
                 if (c != '0' && c != '1')
                 {
