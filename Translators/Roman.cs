@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace NumberConversion.Translators
 {
@@ -54,21 +55,18 @@ namespace NumberConversion.Translators
                 throw new ArgumentException($"Number {romanNum} is not valid roman number!");
             }
 
-            int decimalOutput = 0;
 
+            int decimalOutput = 0;
             int previous = 0;
             foreach (char currentRoman in romanNum)
             {
                 int current = RomanToDecimalDictionary[currentRoman];
-                if (previous != 0 && current > previous)
+                if (previous < current)
                 {
-                    decimalOutput -= (2 * previous) + current;
+                    decimalOutput -= previous;
+                    current -= previous;
                 }
-                else
-                {
-                    decimalOutput += current;
-                }
-
+                decimalOutput += current;
                 previous = current;
             }
 
@@ -82,6 +80,11 @@ namespace NumberConversion.Translators
         /// <returns>The Roman numeral representation of the input decimal number.</returns>
         public static string TranslateTo(int decimalNum)
         {
+            if (decimalNum == 0)
+            {
+                return "NON-DEFINED";
+            }
+
             if (decimalNum > MaxInputValue)
             {
                 throw new ArgumentOutOfRangeException($"Limit for converting to Roman is {MaxInputValue}!");
@@ -102,13 +105,12 @@ namespace NumberConversion.Translators
 
         public static bool IsValid(string romanNumber)
         {
+            Regex pattern = new("^M*(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$");
 
-            foreach (char item in romanNumber)
+
+            if (!pattern.IsMatch(romanNumber))
             {
-                if (!RomanToDecimalDictionary.ContainsKey(item))
-                {
-                    return false;
-                }
+                return false;
             }
 
             return true;

@@ -55,11 +55,6 @@ namespace NumberConversion
                 value = value.Remove(commaIndex, 1).Insert(commaIndex, ",");
             }
 
-            if (!double.TryParse(value, out double _))
-            {
-                return false;
-            }
-
             return true;
         }
 
@@ -76,12 +71,13 @@ namespace NumberConversion
                 return decimalValue.ToString();
             }
 
+            // Math.Abs used cause Roman and Binary have no implemantation of negative TODO!
             string result = system switch
             {
-                "Binary" => Binary.TranslateTo(decimalValue),
+                "Binary" => Binary.TranslateTo(Math.Abs(decimalValue)),
                 "Hexadecimal" => Hexadecimal.TranslateTo(decimalValue),
                 "Octal" => Octal.TranslateTo(decimalValue),
-                "Roman" => Roman.TranslateTo(decimalValue),
+                "Roman" => Roman.TranslateTo(Math.Abs(decimalValue)),
                 _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
             };
 

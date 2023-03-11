@@ -1,6 +1,6 @@
 ﻿namespace NumberConversion.Translators
 {
-    static class Octal
+    public static class Octal
     {
         public static int TranslateFrom(string octalNumRaw)
         {
@@ -42,14 +42,14 @@
 
         public static bool IsValid(string octalNumber)
         {
-            if (!int.TryParse(octalNumber, out int _))
+            if (!double.TryParse(octalNumber, out double _))
             {
                 return false;
             }
 
             foreach (char c in octalNumber)
             {
-                if (c == '9')
+                if (c == '9' || c == '8')
                 {
                     return false;
                 }

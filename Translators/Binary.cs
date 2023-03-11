@@ -1,6 +1,6 @@
 ﻿namespace NumberConversion.Translators
 {
-    static class Binary
+    public static class Binary
     {
         public static int TranslateFrom(string binaryNumRaw)
         {
@@ -23,11 +23,17 @@
             return decimalOutput;
         }
 
+
         public static string TranslateTo(int decimalNum)
         {
             if (decimalNum == 0)
             {
                 return "0";
+            }
+
+            if (decimalNum < 0)
+            {
+                decimalNum *= -1;
             }
 
             string binaryOutput = string.Empty;
@@ -53,6 +59,11 @@
                 return false;
             }
 
+            if (!double.TryParse(binaryNumber, out double _))
+            {
+                return false;
+            }
+
             foreach (char c in binaryNumber)
             {
                 if (c != '0' && c != '1')
@@ -60,6 +71,8 @@
                     return false;
                 }
             }
+
+
 
             return true;
         }
