@@ -24,6 +24,11 @@
 
         public static string TranslateTo(int decimalNum)
         {
+            if (decimalNum == 0)
+            {
+                return "0";
+            }
+
             string octalOutput = string.Empty;
             int i = 0;
             while (decimalNum != 0)
