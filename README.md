@@ -11,6 +11,6 @@ A console app project for converting numbers from one numerical system to other.
 
 ## Aditional Information
 
-* For any conversion float numbers not accepted!
-* For Roman and Binary conversion, negative not accepted!
+* Negative Binary numbers must be byte inverted positive version of these numbers!
+* For Roman and Binary negative numbers are not accepted! (treated as positive)
 * This project uses Spectre.Console framework, which helps with UI design of the application.
