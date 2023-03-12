@@ -10,7 +10,7 @@ namespace NumberConversion.Translators
         /// <summary>
         /// The maximum allowed length of a valid hexadecimal string.
         /// </summary>
-        private static readonly int MaxHexLength = 30;
+        private const int MaxHexLength = 10;
 
         /// <summary>
         /// A dictionary that maps hexadecimal characters to their integer values.
@@ -35,29 +35,35 @@ namespace NumberConversion.Translators
             { 'F', 15 }
         };
 
-
         /// <summary>
         /// Converts a hexadecimal string to a decimal integer.
         /// </summary>
         /// <param name="hexadecimalNum">The hexadecimal string to convert. The input string must be a valid hexadecimal number.</param>
-        /// <returns>The decimal integer equivalent of the hexadecimal string.</returns>
+        /// <returns>The decimal Int32 equivalent of the hexadecimal string.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the input string is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if the input string is not a valid hexadecimal number or is too large.</exception>
+        /// <exception cref="OverflowException">Thrown if the conversion result exceeds the maximum value for a 32-bit integer.</exception>
         public static int TranslateFrom(string hexadecimalNum)
         {
-            if (!IsValid(hexadecimalNum))
+            if (string.IsNullOrEmpty(hexadecimalNum))
             {
-                throw new ArgumentException($"Number {hexadecimalNum} is not valid hexadecimal number!");
+                throw new ArgumentNullException(nameof(hexadecimalNum));
             }
 
-            if (hexadecimalNum.Length > MaxHexLength)
+            bool isNegative = false;
+            if (hexadecimalNum[0] == '-')
             {
-                throw new ArgumentException($"Number {hexadecimalNum} is too large!");
+                isNegative = true;
+                hexadecimalNum = hexadecimalNum[1..];
+            }
+
+            if (!IsValidHexadecimal(hexadecimalNum))
+            {
+                throw new ArgumentException($"Value {hexadecimalNum} is not a valid hexadecimal number!");
             }
 
             int decimalOutput = 0;
-            int hexLength = hexadecimalNum.Length;
-
-            for (int i = 0; i < hexLength; i++)
+            for (int i = 0; i < hexadecimalNum.Length; i++)
             {
                 char hexChar = char.ToUpper(hexadecimalNum[i]);
 
@@ -65,10 +71,20 @@ namespace NumberConversion.Translators
                 {
                     throw new Exception($"Unexpected error while converting {hexChar} into integer representative.");
                 }
-                decimalOutput += hexValue * (int)Math.Pow(16, hexLength - i - 1);
+
+                checked
+                {
+                    int previous = decimalOutput;
+                    decimalOutput = decimalOutput * 16 + hexValue;
+
+                    if (decimalOutput < previous)
+                    {
+                        throw new OverflowException();
+                    }
+                }
             }
 
-            return decimalOutput;
+            return isNegative ? -decimalOutput : decimalOutput;
         }
 
         /// <summary>
@@ -76,39 +92,55 @@ namespace NumberConversion.Translators
         /// </summary>
         /// <param name="decimalNum">The decimal integer to convert.</param>
         /// <returns>The hexadecimal string representation of the decimal integer.</returns>
+        /// <exception cref="ArgumentException">Thrown if the input integer is not a valid 32-bit integer.</exception>
         public static string TranslateTo(int decimalNum)
         {
+            if (!IsValidDecimal(decimalNum))
+            {
+                throw new ArgumentException($"Value {decimalNum} is not a valid integer!");
+            }
+
+            if (decimalNum == 0)
+            {
+                return "0";
+            }
+
             StringBuilder hexOutput = new();
-            do
+            while (decimalNum > 0)
             {
                 int remainder = decimalNum % 16;
-
                 if (remainder < 10)
                 {
-                    // insert remainder as digit into StringBuilder
                     hexOutput.Insert(0, remainder);
                 }
                 else
                 {
-                    // convert to corresponding hexadecimal character and insert into StringBuilder
-                    char hexChar = (char)(remainder - 10 + 'A'); // A is 10 in decimal
+                    char hexChar = (char)(remainder - 10 + 'A');
                     hexOutput.Insert(0, hexChar);
                 }
 
                 decimalNum /= 16;
-            } while (decimalNum > 0);
+            }
 
             return hexOutput.ToString();
         }
 
         /// <summary>
-        /// Check if a string hexadecimal number is a valid via custom rules.
+        /// Checks if a string representing a hexadecimal number is valid according to custom rules.
         /// </summary>
-        /// <param name="hexNumber">A string representing a hexadecimal number</param>
-        /// <returns>True if the hexadecimal number is a valid hexadecimal number, false otherwise</returns>
-        private static bool IsValid(string hexNumber)
+        /// <param name="hexadecimalNum">The string to check.</param>
+        /// <returns>True if the input string is a valid hexadecimal number, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the input string is null or empty.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the input string exceeds the maximum allowed length for conversion.</exception>
+        /// <exception cref="ArgumentException">Thrown if the input string is not a valid hexadecimal number.</exception>
+        private static bool IsValidHexadecimal(string hexadecimalNum)
         {
-            foreach (char item in hexNumber)
+            if (hexadecimalNum.Length > MaxHexLength)
+            {
+                throw new ArgumentOutOfRangeException($"Value {hexadecimalNum} exceeds maximum allowed length for conversion.");
+            }
+
+            foreach (char item in hexadecimalNum)
             {
                 if (!HexValues.ContainsKey(char.ToUpper(item)))
                 {
@@ -117,6 +149,17 @@ namespace NumberConversion.Translators
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Checks if an integer is a valid 32-bit integer.
+        /// </summary>
+        /// <param name="decimalNum">The integer to check.</param>
+        /// <returns>True if the input integer is a valid 32-bit integer, false otherwise.</returns>
+        /// <exception cref="ArgumentException">Thrown if the input integer is not a valid 32-bit integer.</exception>
+        private static bool IsValidDecimal(int decimalNum)
+        {
+            return decimalNum >= 0;
         }
     }
 }

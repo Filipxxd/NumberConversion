@@ -15,47 +15,31 @@ namespace NumberConversion
         /// <returns>A dictionary containing the translated number for each output numerical system.</returns>
         public static Dictionary<string, string> Translate(string number, string numSystem, List<string> outputSystems)
         {
-            int num = 0;
-            if (IsValid(number))
             {
-                if (numSystem != "Decimal")
+                int commaIndex = number.IndexOf('.');
+                if (commaIndex != -1)
                 {
-                    num = GetToDecimal(number, numSystem);
+                    number = number.Remove(commaIndex, 1).Insert(commaIndex, ",");
                 }
-                else
-                {
-                    num = (int)Math.Floor(double.Parse(number));
-                }
+            }
+
+            int num;
+            if (numSystem != "Decimal")
+            {
+                num = GetToDecimal(number, numSystem);
+            }
+            else
+            {
+                num = (int)Math.Floor(double.Parse(number));
             }
 
             Dictionary<string, string> translations = new();
             foreach (var outputSystem in outputSystems)
             {
-                translations.Add(outputSystem, GetFromDecimal(num, outputSystem));
+                string outputValue = GetFromDecimal(num, outputSystem);
+                translations.Add(outputSystem, outputValue);
             }
-
             return translations;
-        }
-
-        /// <summary>
-        /// Validates whether a given string is a valid number in any numerical system via custom ruleset.
-        /// </summary>
-        /// <param name="value">The string to validate.</param>
-        /// <returns>True if the string is a valid number, otherwise false.</returns>
-        private static bool IsValid(string value)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                return false;
-            }
-
-            int commaIndex = value.IndexOf('.');
-            if (commaIndex != -1)
-            {
-                value = value.Remove(commaIndex, 1).Insert(commaIndex, ",");
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -71,15 +55,38 @@ namespace NumberConversion
                 return decimalValue.ToString();
             }
 
-            // Math.Abs used cause Roman and Binary have no implemantation of negative TODO!
-            string result = system switch
+            string result = string.Empty;
+            try
             {
-                "Binary" => Binary.TranslateTo(Math.Abs(decimalValue)),
-                "Hexadecimal" => Hexadecimal.TranslateTo(decimalValue),
-                "Octal" => Octal.TranslateTo(decimalValue),
-                "Roman" => Roman.TranslateTo(Math.Abs(decimalValue)),
-                _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
-            };
+                result = system switch
+                {
+                    "Binary" => Binary.TranslateTo(decimalValue),
+                    "Hexadecimal" => Hexadecimal.TranslateTo(decimalValue),
+                    "Octal" => Octal.TranslateTo(decimalValue),
+                    "Roman" => Roman.TranslateTo(decimalValue),
+                    _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
+                };
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (FormatException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
             return result;
         }
@@ -92,14 +99,22 @@ namespace NumberConversion
         /// <returns>The decimal representation of the input number. Returns -1 if the input system is not supported.</returns>
         private static int GetToDecimal(string num, string system)
         {
-            int decimalValue = system switch
+            int decimalValue = 0;
+            try
             {
-                "Binary" => Binary.TranslateFrom(num),
-                "Hexadecimal" => Hexadecimal.TranslateFrom(num),
-                "Octal" => Octal.TranslateFrom(num),
-                "Roman" => Roman.TranslateFrom(num),
-                _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
-            };
+                decimalValue = system switch
+                {
+                    "Binary" => Binary.TranslateFrom(num),
+                    "Hexadecimal" => Hexadecimal.TranslateFrom(num),
+                    "Octal" => Octal.TranslateFrom(num),
+                    "Roman" => Roman.TranslateFrom(num),
+                    _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             return decimalValue;
         }
     }

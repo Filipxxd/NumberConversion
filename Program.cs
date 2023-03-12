@@ -1,15 +1,21 @@
 ﻿using Spectre.Console;
+using System.Text.RegularExpressions;
 
 namespace NumberConversion
 {
-    class Program
+    partial class Program
     {
         public static void Main(string[] args)
         {
             if (!AnsiConsole.Profile.Capabilities.Interactive)
             {
-                AnsiConsole.MarkupLine("[red]Environment does not support interaction.[/]");
+                AnsiConsole.Write(new Markup($"[red]Environment does not support interaction[/]" + Environment.NewLine));
                 return;
+            }
+
+            if (Console.BackgroundColor != ConsoleColor.Black)
+            {
+                Console.BackgroundColor = ConsoleColor.Black;
             }
 
             AnsiConsole.Write(
@@ -27,23 +33,8 @@ namespace NumberConversion
             List<string> outputSystems = AskOutputSystems();
 
             WriteDivider("Result");
-            try
-            {
-                DisplayTranslationsToConsole(TranslationManager.Translate(number, inputSystem, outputSystems));
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            catch (FormatException ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.Write(ex.Message);
-            }
-
+            Dictionary<string, string> outputValues = TranslationManager.Translate(number, inputSystem, outputSystems);
+            DisplayTranslationsToConsole(outputValues);
 
             WriteDivider("Press Any To Close");
             Console.ReadLine();
@@ -70,9 +61,11 @@ namespace NumberConversion
         /// <param name="text">The text to display in the divider.</param>
         private static void WriteDivider(string text)
         {
-            AnsiConsole.WriteLine();
-            AnsiConsole.Write(new Rule($"[yellow]{text}[/]").RuleStyle("grey").LeftJustified());
+            AnsiConsole.Write(new Rule(Environment.NewLine + $"[yellow]{text}[/]").RuleStyle("grey").LeftJustified());
         }
+
+        [GeneratedRegex("^[a-zA-Z0-9-.,]+$")]
+        private static partial Regex MyRegex();
 
         /// <summary>
         /// Asks the user to input a number to translate.
@@ -80,7 +73,13 @@ namespace NumberConversion
         /// <returns>The user's input.</returns>
         private static string AskInputNumber()
         {
-            return AnsiConsole.Ask<string>("Please type in a [green]number[/] to translate: ");
+            Regex regex = MyRegex();
+
+            return AnsiConsole.Prompt(new TextPrompt<string>("Please type in a [green]number[/] to translate: ")
+                .PromptStyle("green")
+                .Validate(userInput => regex.IsMatch(userInput) && userInput.Length < 50 ?
+                    ValidationResult.Success() :
+                    ValidationResult.Error("[red]Please type in a valid number no longer than 50 chars.[/]")));
         }
 
         /// <summary>
@@ -119,7 +118,5 @@ namespace NumberConversion
             selection.Reverse();
             return selection;
         }
-
-
     }
 }

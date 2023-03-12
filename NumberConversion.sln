@@ -5,7 +5,7 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NumberConversion", "NumberConversion.csproj", "{8B412003-C2A6-4989-9773-F7BE7B37A5F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestNumberConversion", "..\TestNumberConversion\TestNumberConversion.csproj", "{698F94DC-273F-4427-A074-743DD37BD837}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NumberConversionUT", "..\TestNumberConversion\NumberConversionUT.csproj", "{698F94DC-273F-4427-A074-743DD37BD837}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
