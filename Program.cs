@@ -10,7 +10,7 @@ namespace NumberConversion
         {
             if (!AnsiConsole.Profile.Capabilities.Interactive)
             {
-                Console.WriteLine("Environment does not support interaction");
+                Console.WriteLine("Environment does not support interaction.");
                 return;
             }
 
@@ -76,13 +76,13 @@ namespace NumberConversion
         {
             Regex regex = InputRegex();
 
-            return AnsiConsole.Prompt(new TextPrompt<string>("Please type in a [green]number[/] to translate: ")
+            return AnsiConsole.Prompt(new TextPrompt<string>("Please type in a [green]number[/] for conversion: ")
                 .PromptStyle("green")
                 .Validate(userInput =>
                     regex.IsMatch(userInput) && userInput.Length < MaxCharactersCount ?
                         ValidationResult.Success() :
                         ValidationResult.Error(
-                            "[red]Please type in a valid number that has no more than 50 chars.[/]" +
+                            $"[red]Please type in a valid number with maximum of {MaxCharactersCount} chars.[/]" +
                             Environment.NewLine +
                             $"[red]Bear in mind that only positive whole numbers are accepted![/]")));
         }
@@ -111,7 +111,7 @@ namespace NumberConversion
 
             var selection = AnsiConsole.Prompt(
                 new MultiSelectionPrompt<string>()
-                    .Title("Which [green]numerical system(s)[/] do you want to translate into?")
+                    .Title("Which [green]numerical system(s)[/] do you want to convert into?")
                     .MoreChoicesText("[grey](Move up and down via arrow keys)[/]")
                     .InstructionsText("[grey](Press [blue]<spacebar>[/] to select a numerical system, [green]<enter>[/] to accept)[/]")
                     .AddChoices(availableSystems));
@@ -126,7 +126,7 @@ namespace NumberConversion
         /// <param name="translations">A dictionary containing the translations.</param>
         private static void WriteTranslations(List<string> outputSystems, long decimalNumber)
         {
-            var table = new Table().AddColumns("[grey]Numerical system[/]", "[grey]Translation[/]").Centered();
+            var table = new Table().AddColumns("[grey]Numerical system[/]", "[grey]Value[/]").Centered();
             table.Columns[1].Alignment(Justify.Right);
 
             foreach (string outputSystem in outputSystems)
