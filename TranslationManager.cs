@@ -2,120 +2,98 @@
 
 namespace NumberConversion
 {
+    /// <summary>
+    /// Provides methods to translate numbers between different numerical systems.
+    /// </summary>
     static class TranslationManager
     {
-        public static List<string> NumericalSystems = new() { "Binary", "Roman", "Decimal", "Hexadecimal", "Octal" };
+        /// <summary>
+        /// Availible Numerical systems for conversion to or from one another.
+        /// </summary>
+        public enum NumericalSystem
+        {
+            Binary,
+            Roman,
+            Decimal,
+            Hexadecimal,
+            Octal
+        }
 
         /// <summary>
-        /// Translates a number from one numerical system to one or more output numerical systems.
+        /// Translates a number to the specified numerical system.
         /// </summary>
-        /// <param name="fromSystem">The input numerical system of the number.</param>
+        /// <param name="system">The target numerical system.</param>
         /// <param name="number">The number to translate.</param>
-        /// <param name="outputSystems">A list of output numerical systems to translate the number to.</param>
-        /// <returns>A dictionary containing the translated number for each output numerical system.</returns>
-        public static Dictionary<string, string> Translate(string number, string numSystem, List<string> outputSystems)
+        /// <returns>The translated number as a string.</returns>
+        public static string Translate(long number, NumericalSystem system)
         {
-            {
-                int commaIndex = number.IndexOf('.');
-                if (commaIndex != -1)
-                {
-                    number = number.Remove(commaIndex, 1).Insert(commaIndex, ",");
-                }
-            }
-
-            int num;
-            if (numSystem != "Decimal")
-            {
-                num = GetToDecimal(number, numSystem);
-            }
-            else
-            {
-                num = (int)Math.Floor(double.Parse(number));
-            }
-
-            Dictionary<string, string> translations = new();
-            foreach (var outputSystem in outputSystems)
-            {
-                string outputValue = GetFromDecimal(num, outputSystem);
-                translations.Add(outputSystem, outputValue);
-            }
-            return translations;
-        }
-
-        /// <summary>
-        /// Converts a decimal value to a list of pairs: number system and value.
-        /// </summary>
-        /// <param name="decimalValue">The decimal value to convert.</param>
-        /// <param name="system">The list of number systems to convert the value to.</param>
-        /// <returns>A dictionary that maps each number system to its corresponding converted value.</returns>
-        private static string GetFromDecimal(int decimalValue, string system)
-        {
-            if (system == "Decimal")
-            {
-                return decimalValue.ToString();
-            }
-
-            string result = string.Empty;
+            string translation;
             try
             {
-                result = system switch
+                translation = system switch
                 {
-                    "Binary" => Binary.TranslateTo(decimalValue),
-                    "Hexadecimal" => Hexadecimal.TranslateTo(decimalValue),
-                    "Octal" => Octal.TranslateTo(decimalValue),
-                    "Roman" => Roman.TranslateTo(decimalValue),
+                    NumericalSystem.Binary => Binary.TranslateTo(number),
+                    NumericalSystem.Hexadecimal => Hexadecimal.TranslateTo(number),
+                    NumericalSystem.Octal => Octal.TranslateTo(number),
+                    NumericalSystem.Roman => Roman.TranslateTo(number),
+                    NumericalSystem.Decimal => number.ToString(),
                     _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
                 };
             }
-            catch (InvalidOperationException ex)
+            catch (ArgumentNullException)
             {
-                Console.WriteLine(ex.Message);
+                translation = "null";
             }
-            catch (ArgumentOutOfRangeException ex)
+            catch (ArgumentOutOfRangeException)
             {
-                Console.WriteLine(ex.Message);
+                translation = "out-of-range";
             }
-            catch (FormatException ex)
+            catch (ArgumentException)
             {
-                Console.WriteLine(ex.Message);
+                translation = "argument-except";
             }
-            catch (ArgumentException ex)
+            catch (InvalidOperationException)
             {
-                Console.WriteLine(ex.Message);
+                translation = "invalid-operation";
             }
-            catch (Exception ex)
+            catch (OverflowException)
             {
-                Console.WriteLine(ex.Message);
+                translation = "overflow";
+            }
+            catch (Exception)
+            {
+                translation = "except";
             }
 
-            return result;
+            return translation;
         }
 
         /// <summary>
-        /// Converts a number in the given number system to its decimal representation.
+        /// Translates a number from the specified numerical system into Int64 Decimal value.
         /// </summary>
-        /// <param name="num">The number to convert.</param>
-        /// <param name="system">The number system of the input number (e.g. Binary, Hexadecimal, Octal).</param>
-        /// <returns>The decimal representation of the input number. Returns -1 if the input system is not supported.</returns>
-        private static int GetToDecimal(string num, string system)
+        /// <param name="system">The number´s original numerical system.</param>
+        /// <param name="number">The number to translate.</param>
+        /// <returns>The translated number as a string.</returns>
+        public static long TryConversionFrom(NumericalSystem system, string number)
         {
-            int decimalValue = 0;
-            try
+            return system switch
             {
-                decimalValue = system switch
-                {
-                    "Binary" => Binary.TranslateFrom(num),
-                    "Hexadecimal" => Hexadecimal.TranslateFrom(num),
-                    "Octal" => Octal.TranslateFrom(num),
-                    "Roman" => Roman.TranslateFrom(num),
-                    _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
-                };
-            }
-            catch (Exception ex)
+                NumericalSystem.Binary => Binary.TranslateFrom(number),
+                NumericalSystem.Hexadecimal => Hexadecimal.TranslateFrom(number),
+                NumericalSystem.Octal => Octal.TranslateFrom(number),
+                NumericalSystem.Roman => Roman.TranslateFrom(number),
+                NumericalSystem.Decimal => Convert.ToInt64(number),
+                _ => throw new ArgumentException($"The numerical system '{system}' is not valid/supported."),
+            };
+        }
+
+        public static NumericalSystem IdentifySystem(string possibleSystem)
+        {
+            if (!Enum.TryParse(possibleSystem, true, out NumericalSystem system))
             {
-                Console.WriteLine(ex.Message);
+                throw new ArgumentException($"System '{possibleSystem}' is not defined.");
             }
-            return decimalValue;
+            return system;
         }
     }
 }
